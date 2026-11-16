@@ -1,4 +1,4 @@
-# DemDam Thanksgiving Signup
+# DemDam Friendsgiving Signup
 
 A one-page signup site for Friendsgiving. The page is plain HTML hosted on GitHub Pages; signups are stored in a Google Sheet through a small Apps Script web app.
 
@@ -35,19 +35,19 @@ Open `index.html` in a browser to test: add a dish, then check that a row appear
 
 ## 3. Publish on GitHub Pages
 
-1. Create a new repository on GitHub (for example `thanksgiving-signup`). It can be public.
+1. Create a new repository on GitHub (for example `friendsgiving-signup`). It can be public.
 2. Push this folder to it:
 
    ```bash
    git init
    git add index.html README.md apps-script
-   git commit -m "DemDam Thanksgiving signup"
+   git commit -m "DemDam Friendsgiving signup"
    git branch -M main
-   git remote add origin https://github.com/YOUR-USERNAME/thanksgiving-signup.git
+   git remote add origin https://github.com/YOUR-USERNAME/friendsgiving-signup.git
    git push -u origin main
    ```
 3. On GitHub, open **Settings → Pages**. Under "Build and deployment", choose **Deploy from a branch**, branch **main**, folder **/ (root)**, and save.
-4. After a minute the site is live at `https://YOUR-USERNAME.github.io/thanksgiving-signup/`. Send that link to your friends.
+4. After a minute the site is live at `https://YOUR-USERNAME.github.io/friendsgiving-signup/`. Send that link to your friends.
 
 ## Changing things later
 
