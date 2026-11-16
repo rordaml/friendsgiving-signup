@@ -1,3 +1,7 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>DemDam Friendsgiving Signup</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,9 +44,18 @@
   color-scheme: dark;
 }
 
+:root {
+  color-scheme: light;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; } }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
 html, body { overflow-x: clip; }
 body {
+  margin: 0;
   background: var(--ground);
   color: var(--ink);
   font-family: var(--font-body);
@@ -284,6 +297,42 @@ section { display: flex; flex-direction: column; gap: 16px; }
 }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* ---------- clickable turkeys, roasting, cornucopia, Lauren mode ---------- */
+.walker, .art { cursor: pointer; }
+.art { position: relative; }
+.sprite { display: block; }
+.steam { animation: steam 2.4s ease-in-out infinite; }
+@keyframes steam { 0% { opacity: 0; transform: translateY(4px); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
+.lauren .walker svg { animation: none; }
+.lauren .walker.floaty svg { animation: sway 3.4s ease-in-out infinite alternate; transform-origin: 50% 0; }
+@keyframes sway { from { transform: rotate(-7deg) translateY(0); } to { transform: rotate(7deg) translateY(-8px); } }
+.sprite.poof svg { animation: poof .28s ease-in forwards !important; transform-origin: 50% 100%; }
+@keyframes poof { to { transform: scale(.15) rotate(160deg); opacity: 0; } }
+.sprite.pop svg { animation: popin .65s cubic-bezier(.3, 1.7, .5, 1) !important; transform-origin: 50% 100%; }
+@keyframes popin { from { transform: scale(.2); } }
+.sprite.jiggle svg { animation: jiggle .52s !important; transform-origin: 50% 100%; }
+@keyframes jiggle { 25% { transform: scale(1.12, .88); } 50% { transform: scale(.92, 1.08); } 75% { transform: scale(1.04, .97); } }
+.puff {
+  position: absolute; left: var(--x); bottom: var(--y);
+  width: var(--s); height: var(--s); margin-left: calc(var(--s) / -2);
+  border-radius: 50%; background: var(--c);
+  pointer-events: none; z-index: 3;
+  animation: puff .75s ease-out forwards;
+}
+.puff.leafy { border-radius: 0 70% 0 70%; }
+@keyframes puff {
+  from { transform: translate(0, 0) scale(.4) rotate(0); opacity: 1; }
+  to { transform: translate(var(--dx), var(--dy)) scale(1.3) rotate(140deg); opacity: 0; }
+}
+.cc-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px 24px; padding-top: 8px; }
+.cornucopia { background: none; border: 0; padding: 6px; cursor: pointer; border-radius: 16px; }
+.cornucopia svg { display: block; width: min(250px, 66vw); height: auto; transition: transform .2s; transform-origin: 30% 80%; }
+.cornucopia:hover svg { transform: rotate(-4deg) scale(1.03); }
+.cornucopia.shake svg { animation: ccshake .6s; }
+@keyframes ccshake { 20% { transform: rotate(-9deg); } 40% { transform: rotate(7deg); } 60% { transform: rotate(-4deg); } 80% { transform: rotate(2deg); } }
+.cc-eye { opacity: 0; transition: opacity .8s; }
+.cornucopia.watching .cc-eye { opacity: 1; }
+
 @media (max-width: 560px) {
   :root { --pscale: .7; }
   .masthead { padding-block: 28px 0; }
@@ -291,7 +340,10 @@ section { display: flex; flex-direction: column; gap: 16px; }
   .art svg { height: 52px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .walker, .walker svg, .leg, .eye, .youbar input.needs { animation: none !important; }
+  .walker, .walker svg, .leg, .eye, .steam, .youbar input.needs, .cornucopia.shake svg { animation: none !important; }
+  .sprite.poof svg, .sprite.pop svg, .sprite.jiggle svg { animation: none !important; }
+  .puff { display: none; }
+  .cornucopia svg { transition: none; }
   .card { transition: none; }
 }
 </style>
@@ -361,17 +413,23 @@ section { display: flex; flex-direction: column; gap: 16px; }
       </div>
       <button class="btn small" id="clearSample" type="button">Clear sample signups</button>
     </div>
+
+    <div class="cc-row">
+      <button class="cornucopia" id="cornucopia" type="button" aria-label="Return the turkeys to normal"></button>
+      <button class="btn" id="modeBtn" type="button">Lauren mode</button>
+    </div>
   </div>
 </main>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="turkeys.js"></script>
 <script>
 /* ===================== CONFIG ===================== */
 // When hosting on GitHub Pages, paste the Google Apps Script web app URL (ends in /exec) here.
 // Left empty, the page runs as a mockup with sample data held in memory.
 const SHEET_API = 'https://script.google.com/macros/s/AKfycbwW-rz1ugummfpc_zQPbuY9Q-uhEOu_3atDT3rJR9cDet0JAIgn3fZPMW1pfxqetdA5Ng/exec';
-const HOST_NAME = 'DemDam';
+const HOST_NAME = 'Landon & Lauren';
 const EXPECTED = { min: 6, max: 8 };
 const HOST_ITEMS = ['Turkey', 'Gravy', 'Oyster dressing', 'Cranberry sauce', 'Pie'];
 const CATS = [
@@ -398,8 +456,6 @@ tickCountdown();
 setInterval(tickCountdown, 1000);
 const catName = id =>(CATS.find(c => c.id === id) || { name: id }).name;
 
-// Turkeys look normal for GRACE seconds, then reach full horror after GRACE + RAMP seconds.
-const GRACE = 15, RAMP = 225;
 
 const SAMPLE = [
   ['The Riveras', 'potato', 'Mashed potatoes'],
@@ -411,258 +467,6 @@ const SAMPLE = [
   ['The Okafors', 'salad', 'Kale salad'],
   ['Jun', 'other', 'Sparkling cider']
 ];
-
-/* ===================== TURKEYS ===================== */
-const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const FEATHERS = ['var(--persimmon)', 'var(--mustard)', 'var(--cobalt)', 'var(--mustard)'];
-const EYE_POS = {
-  1: [[3, -3]],
-  3: [[-5, -5], [5, -6], [0, 3]],
-  5: [[-7, -4], [0, -9], [7, -4], [-4, 5], [5, 5]]
-};
-function rng(seed) {
-  let a = seed >>> 0;
-  return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-}
-const clamp01 = x => Math.min(1, Math.max(0, x));
-const ss = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
-const f1 = n => Math.round(n * 10) / 10;
-
-// How weird a turkey is at madness m (0..1). Each trait goes strange early; everything else follows.
-function params(trait, seed, m) {
-  const s = (a, b) => ss(a, b, m);
-  const p = { seed, m, horror: m > .5 };
-  p.legs = 34 * (1 + (trait === 'stilts' ? 2.6 : .5) * s(.05, .4));
-  p.neck = 20 * (1 + (trait === 'neck' ? 3.4 : .7) * s(.08, .45));
-  p.headEyes = trait === 'eyes' ? (m > .3 ? 5 : m > .1 ? 3 : 1) : (m > .55 ? 5 : m > .35 ? 3 : 1);
-  p.cutlery = trait === 'cutlery' && m > .1;
-  p.feathers = 7 + 2 * Math.round(3 * s(.15, .6));
-  p.tailLen = 50 * (1 + (trait === 'tail' ? .9 : .3) * s(.1, .5));
-  p.featherEyes = m > .4;
-  p.tailTent = !p.cutlery && m > .62;
-  p.hatDepth = trait === 'totem' ? (m > .3 ? 2 : m > .1 ? 1 : 0)
-    : ((trait === 'hat' && m > .1) || (seed % 3 === 0 && m > .5)) ? 1 : 0;
-  p.tentLegs = m > .55 ? 3 + Math.round(5 * s(.55, .9)) : 0;
-  p.bodyEyes = Math.round(14 * s(.48, .95));
-  p.heads = Math.round(3 * s(.62, .95));
-  p.maw = s(.72, .92);
-  p.openBeak = m > .68;
-  p.stalks = Math.round(6 * s(.8, 1));
-  p.swell = 1 + .35 * s(.6, 1);
-  p.wattle = 1 + 1.6 * s(.5, 1);
-  return p;
-}
-
-function drawTurkey(p) {
-  const B = { x0: -36, x1: 46, y0: -40 };
-  const pt = (x, y, r = 0) => { B.x0 = Math.min(B.x0, x - r); B.x1 = Math.max(B.x1, x + r); B.y0 = Math.min(B.y0, y - r); };
-  const R = k => rng(p.seed * 131 + k);
-  const anim = (deg, x, y, r) => RM ? '' :
-    `<animateTransform attributeName="transform" type="rotate" values="${-deg} ${f1(x)} ${f1(y)};${deg} ${f1(x)} ${f1(y)};${-deg} ${f1(x)} ${f1(y)}" dur="${f1(2.2 + r() * 2.5)}s" begin="-${f1(r() * 4)}s" repeatCount="indefinite"/>`;
-  const eye = (x, y, r) => {
-    pt(x, y, r);
-    const inner = p.horror
-      ? `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r * .66)}" fill="var(--mustard)"/><ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(r * .2)}" ry="${f1(r * .58)}" fill="var(--pupil)"/>`
-      : `<circle cx="${f1(x + r * .25)}" cy="${f1(y)}" r="${f1(r * .47)}" fill="var(--pupil)"/>`;
-    return `<g class="eye"><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}" fill="var(--eye)"/>${inner}</g>`;
-  };
-  const tentacle = (bx, by, theta, len, w0, color, r, deg, tipEye) => {
-    const n = 14, waves = 1 + r() * 1.5, amp = 4 + r() * 6, ph = r() * 6.28, curl = (r() < .5 ? -1 : 1) * (6 + r() * 10);
-    const dx = Math.sin(theta), dy = -Math.cos(theta), px = Math.cos(theta), py = Math.sin(theta);
-    const L = [], Rt = [], C = [];
-    for (let i = 0; i <= n; i++) {
-      const t = i / n, along = t * len, side = Math.sin(t * Math.PI * waves + ph) * amp * t + curl * t * t * t;
-      const cx = bx + along * dx + side * px, cy = by + along * dy + side * py, w = (w0 * (1 - t) + .9) / 2;
-      L.push(`${f1(cx + px * w)} ${f1(cy + py * w)}`); Rt.push(`${f1(cx - px * w)} ${f1(cy - py * w)}`);
-      C.push([cx, cy, w]); pt(cx, cy, w);
-    }
-    let g = `<path d="M${L.join('L')}L${Rt.reverse().join('L')}Z" fill="${color}"/>`;
-    for (let i = 3; i < n - 1; i += 2) {
-      const [cx, cy, w] = C[i];
-      g += `<circle cx="${f1(cx + px * w * .45)}" cy="${f1(cy + py * w * .45)}" r="${f1(w * .32)}" fill="var(--eye)" opacity=".55"/>`;
-    }
-    if (tipEye) { const [cx, cy] = C[n]; g += eye(cx, cy, 4.2); }
-    return `<g>${anim(deg, bx, by, r)}${g}</g>`;
-  };
-  const head = (hx, hy, hr, nEyes) => {
-    pt(hx, hy, hr); pt(hx + hr + 11, hy);
-    let g = `<circle cx="${f1(hx)}" cy="${f1(hy)}" r="${f1(hr)}" fill="var(--brown-2)"/>`;
-    const bx = hx + hr - 2;
-    if (p.openBeak) {
-      g += `<path d="M${f1(bx)} ${f1(hy)}L${f1(bx + 11)} ${f1(hy - 6)}L${f1(bx + 11)} ${f1(hy + 9)}Z" fill="var(--pupil)"/>`;
-      g += `<path d="M${f1(bx)} ${f1(hy - 3)}L${f1(bx + 12)} ${f1(hy - 7)}L${f1(bx)} ${f1(hy + 1)}Z" fill="var(--mustard)"/>`;
-      g += `<path d="M${f1(bx)} ${f1(hy + 3)}L${f1(bx + 11)} ${f1(hy + 10)}L${f1(bx)} ${f1(hy + 6)}Z" fill="var(--mustard)"/>`;
-      for (let i = 0; i < 3; i++) g += `<path d="M${f1(bx + 3 + i * 3)} ${f1(hy - 1.5 - i)}l1.4 3l1.4 -3.4Z" fill="var(--eye)"/>`;
-    } else {
-      g += `<path d="M${f1(bx)} ${f1(hy - 2)}L${f1(bx + 12)} ${f1(hy + 1)}L${f1(bx)} ${f1(hy + 5)}Z" fill="var(--mustard)"/>`;
-    }
-    const wl = 17 * p.wattle;
-    g += `<path d="M${f1(bx + 1)} ${f1(hy + 5)}q7 ${f1(wl * .6)} 0 ${f1(wl)}q-6 ${f1(-wl * .4)} 0 ${f1(-wl)}Z" fill="var(--persimmon)"/>`;
-    pt(bx + 6, hy + 5 + wl);
-    for (const [ex, ey] of EYE_POS[nEyes]) g += eye(hx + ex, hy + ey, nEyes > 1 ? 3.4 : 3.6);
-    return g;
-  };
-
-  const sw = p.swell, rx = 30 * sw, ry = 26 * sw;
-  const cy = -p.legs - ry + 2, pv = cy - 6 * sw;
-  let s = '';
-
-  // tail
-  const rT = R(1);
-  for (let i = 0; i < p.feathers; i++) {
-    const a = -75 + 150 * i / (p.feathers - 1), ar = a * Math.PI / 180, len = p.tailLen;
-    const tipX = Math.sin(ar) * len, tipY = pv - Math.cos(ar) * len;
-    if (p.tailTent) {
-      s += tentacle(0, pv, ar, len * 1.3, 11, FEATHERS[i % 4], rT, 7, p.featherEyes);
-    } else if (p.cutlery) {
-      const k = len - 14;
-      const hd = i % 2
-        ? `<ellipse cx="0" cy="${f1(-len + 6)}" rx="6" ry="8.5" fill="var(--ink-soft)"/>`
-        : `<path d="M-6 ${f1(-k)}H6M-6 ${f1(-k)}V${f1(-len)}M0 ${f1(-k)}V${f1(-len)}M6 ${f1(-k)}V${f1(-len)}" stroke="var(--ink-soft)" stroke-width="2.4" stroke-linecap="round" fill="none"/>`;
-      s += `<g transform="translate(0 ${f1(pv)}) rotate(${f1(a)})"><path d="M0 0V${f1(-k)}" stroke="var(--ink-soft)" stroke-width="3.4" stroke-linecap="round" fill="none"/>${hd}</g>`;
-      pt(tipX, tipY, 8);
-    } else {
-      s += `<ellipse cx="0" cy="${f1(-len / 2)}" rx="9.5" ry="${f1(len / 2)}" fill="${FEATHERS[i % 4]}" transform="translate(0 ${f1(pv)}) rotate(${f1(a)})"/>`;
-      pt(tipX, tipY, 10);
-      if (p.featherEyes) s += eye(Math.sin(ar) * (len - 9), pv - Math.cos(ar) * (len - 9), 4);
-    }
-  }
-
-  // legs, or what replaces them
-  if (p.tentLegs) {
-    const rL = R(2), k = p.tentLegs;
-    for (let j = 0; j < k; j++) {
-      const u = k === 1 ? 0 : j / (k - 1) * 2 - 1, th = Math.PI + u * .55;
-      const bx = u * rx * .65, by = cy + ry * .55;
-      s += tentacle(bx, by, th, (-by) / Math.cos(u * .55) * 1.02, 8 * sw, 'var(--brown)', rL, 3, false);
-    }
-  } else {
-    const hip = cy + 18;
-    const leg = (x, dx, c) => `<path class="leg ${c}" d="M${x} ${f1(hip)}L${x + dx} 0l-7 2M${x + dx} 0l0 3.5M${x + dx} 0l7 2" stroke="var(--mustard)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
-    s += leg(-9, -2, 'leg-a') + leg(9, 2, 'leg-b');
-  }
-
-  // extra heads, behind the main one
-  const slots = [[-30, -1.0], [-52, -.7], [0, -1.35]];
-  for (let k = 0; k < p.heads; k++) {
-    const nb = [-8 - k * 6, cy - ry * .6];
-    const hx = slots[k][0] * sw, hy = cy - ry * .5 + slots[k][1] * (30 + p.neck);
-    s += `<path d="M${f1(nb[0])} ${f1(nb[1])}Q${f1(hx - 14)} ${f1((nb[1] + hy) / 2)} ${f1(hx)} ${f1(hy)}" stroke="var(--brown)" stroke-width="8" stroke-linecap="round" fill="none"/>`;
-    s += head(hx, hy, 15, 3);
-  }
-
-  // body
-  s += `<ellipse cx="0" cy="${f1(cy)}" rx="${f1(rx)}" ry="${f1(ry)}" fill="var(--brown)"/>`;
-  s += `<ellipse cx="${f1(-5 * sw)}" cy="${f1(cy + 3)}" rx="${f1(17 * sw)}" ry="${f1(12 * sw)}" fill="var(--pupil)" opacity=".18" transform="rotate(-14 ${f1(-5 * sw)} ${f1(cy + 3)})"/>`;
-  pt(-rx, cy, 0); pt(rx, cy, 0);
-
-  // eyes that grow on the body
-  if (p.bodyEyes) {
-    const rE = R(3), placed = [];
-    for (let i = 0; i < p.bodyEyes; i++) {
-      for (let tries = 0; tries < 40; tries++) {
-        const x = (rE() * 2 - 1) * rx * .8, y = cy + (rE() * 2 - 1) * ry * .75, rr = (2.6 + rE() * 3.6) * sw;
-        if ((x / (rx * .82)) ** 2 + ((y - cy) / (ry * .78)) ** 2 > 1) continue;
-        if (((x - 8 * sw) / (19 * sw)) ** 2 + ((y - cy - 9 * sw) / (13 * sw)) ** 2 < 1.2) continue;
-        if (placed.some(([px, py, pr]) => Math.hypot(px - x, py - y) < pr + rr + 1)) continue;
-        placed.push([x, y, rr]); break;
-      }
-    }
-    placed.forEach(([x, y, rr]) => { s += eye(x, y, rr); });
-  }
-
-  // a mouth where no mouth should be
-  if (p.maw > 0) {
-    const mx = 8 * sw, my = cy + 9 * sw, mrx = 16 * sw * p.maw, mry = 9 * sw * p.maw;
-    s += `<ellipse cx="${f1(mx)}" cy="${f1(my)}" rx="${f1(mrx)}" ry="${f1(mry)}" fill="var(--pupil)"/>`;
-    for (let i = 0; i < 7; i++) {
-      const tx = mx - mrx * .8 + (mrx * 1.6) * i / 6, e = Math.sqrt(Math.max(0, 1 - ((tx - mx) / mrx) ** 2)), tw = mrx * .11;
-      s += `<path d="M${f1(tx - tw)} ${f1(my - mry * e)}L${f1(tx)} ${f1(my - mry * e + mry * .55)}L${f1(tx + tw)} ${f1(my - mry * e)}Z" fill="var(--eye)"/>`;
-      if (i < 6) {
-        const bx = tx + mrx * .8 / 6, eb = Math.sqrt(Math.max(0, 1 - ((bx - mx) / mrx) ** 2));
-        s += `<path d="M${f1(bx - tw)} ${f1(my + mry * eb)}L${f1(bx)} ${f1(my + mry * eb - mry * .5)}L${f1(bx + tw)} ${f1(my + mry * eb)}Z" fill="var(--eye)"/>`;
-      }
-    }
-  }
-
-  // eye stalks
-  const rS = R(4);
-  for (let i = 0; i < p.stalks; i++) {
-    const ang = -1.1 + 2.2 * (i + .5) / 6;
-    const bx = Math.sin(ang) * rx * .6, by = cy - Math.cos(ang) * ry * .8;
-    const ex = Math.sin(ang) * (rx + 16 + (i % 2) * 10), ey = cy - Math.cos(ang) * (ry + 26 + (i % 2) * 14);
-    s += `<g>${anim(8, bx, by, rS)}<path d="M${f1(bx)} ${f1(by)}Q${f1((bx + ex) / 2 + 8)} ${f1((by + ey) / 2)} ${f1(ex)} ${f1(ey)}" stroke="var(--brown-2)" stroke-width="2.6" stroke-linecap="round" fill="none"/>${eye(ex, ey, 4.6)}</g>`;
-  }
-
-  // main neck and head
-  const hr = 11 + (p.headEyes - 1) * 2, hx = 22 * sw, hy = cy - 18 * sw - p.neck;
-  s += `<path d="M${f1(12 * sw)} ${f1(cy - 12 * sw)}Q${f1(30 * sw + p.neck * .15)} ${f1(cy - 16 * sw - p.neck / 2)} ${f1(hx)} ${f1(hy)}" stroke="var(--brown)" stroke-width="10" stroke-linecap="round" fill="none"/>`;
-  s += head(hx, hy, hr, p.headEyes);
-
-  // something standing on its head
-  if (p.hatDepth > 0) {
-    const sub = params('none', p.seed + 11, p.m * .85);
-    sub.hatDepth = p.hatDepth - 1;
-    const d = drawTurkey(sub), sc = p.hatDepth > 1 || sub.hatDepth ? .5 : .4, ty = hy - hr + 2;
-    s += `<g transform="translate(${f1(hx)} ${f1(ty)}) scale(${sc})">${d.g}</g>`;
-    pt(hx + d.B.x0 * sc, ty); pt(hx + d.B.x1 * sc, ty); pt(hx, ty + d.B.y0 * sc);
-  }
-  return { g: s, B };
-}
-function turkeySVG(p, scale) {
-  const { g, B } = drawTurkey(p);
-  const x0 = B.x0 - 4, y0 = B.y0 - 4, w = B.x1 + 4 - x0, h = 7 - y0;
-  const style = scale ? ` style="width:calc(${f1(w * scale)}px * var(--pscale))"` : '';
-  return `<svg viewBox="${f1(x0)} ${f1(y0)} ${f1(w)} ${f1(h)}"${style} aria-hidden="true">${g}</svg>`;
-}
-
-// Parade walkers and section-heading turkeys. d = head start before they turn (higher = later).
-const PARADE = [
-  { trait: 'stilts', seed: 4, s: .8, x: 4, dur: 70, d: .02 },
-  { trait: 'cutlery', seed: 7, s: .92, x: 22, dur: 58, d: .14 },
-  { trait: 'neck', seed: 9, s: .85, x: 38, dur: 64, d: .06 },
-  { trait: 'eyes', seed: 12, s: .92, x: 55, dur: 52, d: .22 },
-  { trait: 'hat', seed: 15, s: .92, x: 72, dur: 60, d: .1 },
-  { trait: 'tail', seed: 21, s: .8, x: 88, dur: 74, d: .18 }
-];
-const sprites = [];
-const parade = document.getElementById('parade');
-PARADE.forEach(t => {
-  const el = document.createElement('div');
-  el.className = 'walker';
-  el.style.cssText = `left:${t.x}%;--dur:${t.dur}s;--delay:${-(t.x + 10) / 110 * t.dur}s`;
-  parade.appendChild(el);
-  sprites.push({ el, trait: t.trait, seed: t.seed, d: t.d, scale: t.s, q: -1 });
-});
-[['art-host', 'hat', 30, .12], ['art-sides', 'neck', 33, .2], ['art-more', 'cutlery', 36, .26], ['art-roster', 'totem', 39, .3]]
-  .forEach(([id, trait, seed, d]) => sprites.push({ el: document.getElementById(id), trait, seed, d, scale: 0, q: -1 }));
-
-let t0 = performance.now();
-const slider = document.getElementById('turkeyTime');
-const sliderOut = document.getElementById('turkeyTimeOut');
-let dragging = false;
-const elapsed = () => (performance.now() - t0) / 1000;
-const madness = () => clamp01((elapsed() - GRACE) / RAMP);
-function tickTurkeys() {
-  const m = madness();
-  for (const sp of sprites) {
-    const q = Math.round(clamp01(m * 1.3 - sp.d) * 60) / 60;
-    if (q === sp.q) continue;
-    sp.q = q;
-    sp.el.innerHTML = turkeySVG(params(sp.trait, sp.seed, q), sp.scale);
-  }
-  const e = Math.floor(elapsed());
-  sliderOut.textContent = `${Math.floor(e / 60)}:${String(e % 60).padStart(2, '0')}`;
-  if (!dragging) slider.value = Math.round(m * 100);
-}
-slider.addEventListener('input', () => {
-  dragging = true;
-  t0 = performance.now() - (GRACE + RAMP * slider.value / 100) * 1000;
-  tickTurkeys();
-});
-slider.addEventListener('change', () => { dragging = false; });
-tickTurkeys();
-setInterval(tickTurkeys, 1000);
 
 /* ===================== DATA ===================== */
 let claims = [];
@@ -731,7 +535,7 @@ function catCard(cat) {
     }
     return `<li class="entry${own ? ' me' : ''}"><span class="hh">${esc(c.household)}</span><span class="what">${dishText(c)}</span>${own
       ? `<span class="acts"><button class="linkbtn" type="button" data-act="edit" data-id="${c.id}">Edit</button><button class="linkbtn" type="button" data-act="remove" data-id="${c.id}">Remove</button></span>` : ''}</li>`;
-  }).join('') : '<li class="none">No one yet</li>';
+  }).join('') : `<li class="none">${loading ? 'Loading…' : 'No one yet'}</li>`;
   return `<article class="card" data-state="${state}">
     <div class="card-top"><h3>${esc(cat.name)}</h3><span class="count" aria-label="${list.length} signed up">${list.length}</span></div>
     <ul class="entries">${rows}</ul>
@@ -851,6 +655,10 @@ document.getElementById('clearSample').addEventListener('click', () => {
   render(); toast('Sample signups cleared');
 });
 
-loadClaims().then(render).catch(() => { render(); toast('Could not load signups'); });
+let loading = !!SHEET_API;
+render();
+loadClaims()
+  .then(() => { loading = false; render(); })
+  .catch(() => { loading = false; render(); toast('Could not load signups. Try reloading the page.'); });
 if (SHEET_API) setInterval(() => { if (!editing) loadClaims().then(render).catch(() => {}); }, 30000);
 </script>
