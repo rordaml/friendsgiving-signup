@@ -1,0 +1,856 @@
+<title>DemDam Thanksgiving Signup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one centered column under a full-bleed header band where turkeys walk along a strip of soil (and slowly stop being turkeys); categories sit in a two-up grid of cards */
+:root {
+  --ground: #DCE3CA;
+  --paper: #F4F6EC;
+  --ink: #2A1B12;
+  --ink-soft: #5F5548;
+  --line: #B4BC9C;
+  --soil: #A3B184;
+  --persimmon: #D4461E;
+  --mustard: #DFA11E;
+  --cobalt: #2B42B5;
+  --cobalt-ink: #FFFFFF;
+  --brown: #7B4A29;
+  --brown-2: #A5703F;
+  --eye: #FFFDF4;
+  --pupil: #1B110A;
+  --font-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, Consolas, monospace;
+  --pscale: 1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #141911; --paper: #1E2419; --ink: #EEEADB; --ink-soft: #ABAE9C;
+    --line: #3B4431; --soil: #2C3523; --persimmon: #EF6A40; --mustard: #EBB43C;
+    --cobalt: #8496F4; --cobalt-ink: #0F1530; --brown: #946038; --brown-2: #B98250;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #141911; --paper: #1E2419; --ink: #EEEADB; --ink-soft: #ABAE9C;
+  --line: #3B4431; --soil: #2C3523; --persimmon: #EF6A40; --mustard: #EBB43C;
+  --cobalt: #8496F4; --cobalt-ink: #0F1530; --brown: #946038; --brown-2: #B98250;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { overflow-x: clip; }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.5;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--ground);
+}
+.gutter {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 900px; margin-inline: auto; }
+:focus-visible { outline: 3px solid var(--cobalt); outline-offset: 2px; }
+
+/* ---------- header ---------- */
+.masthead { padding-block: 40px 0; }
+.masthead .gutter { position: relative; z-index: 2; }
+h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variation-settings: "wdth" 75, "opsz" 96;
+  font-size: clamp(2.8rem, 10vw, 6.4rem);
+  line-height: .88;
+  letter-spacing: -0.02em;
+  margin: 0;
+  text-wrap: balance;
+}
+h1 .t2 { display: block; color: var(--persimmon); }
+.details {
+  margin: 22px 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 10px 28px;
+}
+.details div { display: flex; flex-direction: column; }
+.details dt {
+  font-family: var(--font-mono); font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft);
+}
+.details dd { margin: 0; font-weight: 600; font-size: 1.05rem; }
+.parade {
+  position: relative; z-index: 1;
+  height: calc(230px * var(--pscale));
+  margin-top: 8px;
+  overflow-x: clip; overflow-y: visible;
+}
+.soil { position: relative; z-index: 2; height: 18px; background: var(--soil); border-top: 2px solid var(--ink); }
+.walker {
+  position: absolute;
+  bottom: 0;
+  animation: walk var(--dur) linear infinite;
+  animation-delay: var(--delay);
+}
+.walker svg { display: block; height: auto; animation: bob .45s ease-in-out infinite alternate; }
+@keyframes walk { from { left: -260px; } to { left: 100%; } }
+@keyframes bob { from { transform: translateY(0); } to { transform: translateY(-3px); } }
+.leg { transform-box: fill-box; transform-origin: 50% 0; animation: swing .45s ease-in-out infinite alternate; }
+.leg-b { animation-direction: alternate-reverse; }
+@keyframes swing { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+.eye { transform-box: fill-box; transform-origin: center; animation: blink 6s infinite; }
+.eye:nth-of-type(3n) { animation-delay: -2.3s; }
+.eye:nth-of-type(3n+1) { animation-delay: -4.1s; }
+@keyframes blink { 0%, 95%, 100% { transform: scaleY(1); } 97% { transform: scaleY(.1); } }
+.art svg { display: block; height: 64px; width: auto; }
+.art .leg { animation: none; }
+
+/* ---------- sticky "you" bar ---------- */
+.youbar {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 5;
+  background: var(--paper);
+  border-bottom: 2px solid var(--ink);
+}
+.youbar .wrap {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+  padding-block: 12px;
+}
+.youbar label { font-weight: 600; font-size: .9rem; }
+.youbar input {
+  flex: 1 1 220px; min-width: 0; max-width: 340px;
+  font: inherit; color: var(--ink);
+  background: var(--ground);
+  border: 2px solid var(--ink); border-radius: 10px;
+  padding: 7px 12px;
+}
+.youbar input.needs { border-color: var(--persimmon); animation: shake .35s; }
+@keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+.youbar .mine-count { font-family: var(--font-mono); font-size: .85rem; color: var(--ink-soft); }
+
+/* ---------- main ---------- */
+main .wrap { display: flex; flex-direction: column; gap: 44px; padding-block: 28px 80px; }
+.mock {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px;
+  padding: 10px 14px;
+  border: 1.5px dashed var(--cobalt); border-radius: 10px;
+  color: var(--ink-soft); font-size: .9rem;
+}
+.mock strong { color: var(--cobalt); font-family: var(--font-mono); font-weight: 500; letter-spacing: .06em; text-transform: uppercase; font-size: .78rem; }
+.mock .slider { display: flex; align-items: center; gap: 8px; flex: 1 1 220px; min-width: 0; }
+.mock .slider input { flex: 1; min-width: 0; accent-color: var(--persimmon); }
+.mock .slider output { font-family: var(--font-mono); font-size: .8rem; min-width: 3.5em; text-align: right; }
+
+.countdown {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 8px 24px;
+  padding: 16px 20px;
+  background: var(--paper);
+  border: 2px solid var(--ink); border-radius: 14px;
+}
+.cd-units { display: flex; gap: clamp(14px, 4vw, 34px); }
+.cd-units div { display: flex; flex-direction: column; align-items: center; }
+.cd-units .n {
+  font-family: var(--font-display); font-weight: 800;
+  font-variation-settings: "wdth" 75, "opsz" 96;
+  font-size: clamp(2.2rem, 8vw, 3.6rem); line-height: 1;
+  font-variant-numeric: tabular-nums;
+  min-width: 2ch; text-align: center;
+}
+.cd-units div:last-child .n { color: var(--persimmon); }
+.cd-units .u {
+  font-family: var(--font-mono); font-size: .72rem;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft);
+}
+.cd-for { margin: 0; color: var(--ink-soft); font-weight: 500; padding-bottom: 4px; }
+
+section { display: flex; flex-direction: column; gap: 16px; }
+.sec-head { display: flex; align-items: flex-end; gap: 12px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; }
+.sec-head .art { flex: none; display: flex; align-items: flex-end; }
+.sec-head h2 {
+  margin: 0; flex: 1; min-width: 0;
+  font-family: var(--font-display); font-weight: 750;
+  font-variation-settings: "wdth" 80, "opsz" 48;
+  font-size: clamp(1.6rem, 4.6vw, 2.3rem); line-height: 1;
+}
+.sec-head .meta { font-family: var(--font-mono); font-size: .82rem; color: var(--ink-soft); white-space: nowrap; padding-bottom: 3px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 14px;
+}
+.host-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 10px; }
+.card {
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px 16px;
+  background: var(--paper);
+  border: 2px dashed var(--line);
+  border-radius: 14px;
+  min-width: 0;
+  transition: transform .15s, box-shadow .15s;
+}
+.card[data-state="claimed"] { border-style: solid; border-color: var(--ink); }
+.card[data-state="mine"] { border: 2px solid var(--cobalt); box-shadow: 5px 5px 0 var(--cobalt); transform: translate(-2px, -2px); }
+.host-grid .card { border-style: solid; border-color: var(--ink); gap: 8px; padding: 12px 14px; }
+.card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-variation-settings: "wdth" 85; font-size: 1.3rem; line-height: 1.15; min-width: 0; }
+.host-grid .card h3 { font-family: var(--font-body); font-weight: 600; font-size: 1.02rem; }
+.count {
+  flex: none; min-width: 28px; height: 28px; padding: 0 6px;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  font-family: var(--font-mono); font-size: .85rem; font-variant-numeric: tabular-nums;
+  background: var(--ink); color: var(--paper);
+}
+.card[data-state="open"] .count { background: transparent; color: var(--ink-soft); border: 1.5px dashed var(--line); }
+
+.entries { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.entries .none { color: var(--ink-soft); font-size: .9rem; padding: 4px 0 8px; }
+.entry {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px;
+  padding: 8px 0; border-top: 1px solid var(--line);
+}
+.entry:first-child { border-top: 0; padding-top: 2px; }
+.entry .hh { font-weight: 600; overflow-wrap: anywhere; }
+.entry.me .hh { color: var(--cobalt); }
+.entry .what { flex: 1 1 120px; min-width: 0; overflow-wrap: anywhere; }
+.entry .acts { display: flex; gap: 10px; }
+.tbd {
+  display: inline-block; padding: 0 7px; border-radius: 6px;
+  border: 1.5px dashed var(--ink-soft); color: var(--ink-soft);
+  font-family: var(--font-mono); font-size: .75rem; letter-spacing: .06em; line-height: 1.6;
+}
+.linkbtn {
+  font: inherit; font-size: .82rem; font-weight: 500; color: var(--ink-soft);
+  background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px;
+}
+.linkbtn:hover { color: var(--persimmon); }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 9px; border-radius: 999px;
+  font-size: .82rem; font-weight: 500;
+  background: var(--ground); border: 1px solid var(--line);
+  max-width: 100%; overflow-wrap: anywhere;
+}
+.chip .k { color: var(--ink-soft); font-weight: 400; }
+.chip.me { background: var(--cobalt); border-color: var(--cobalt); color: var(--cobalt-ink); }
+.chip.me .k { color: var(--cobalt-ink); opacity: .75; }
+.chip.host { background: var(--mustard); border-color: var(--mustard); color: #2A1B12; }
+
+.add, .edit { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-top: auto; }
+.edit { margin-top: 4px; width: 100%; }
+.field { display: flex; flex-direction: column; gap: 4px; flex: 1 1 160px; min-width: 0; }
+.field label { font-size: .8rem; font-weight: 600; color: var(--ink-soft); }
+.field input {
+  font: inherit; color: var(--ink); background: var(--ground);
+  border: 2px solid var(--ink); border-radius: 10px; padding: 6px 10px; min-width: 0; width: 100%;
+}
+.btn {
+  font: inherit; font-weight: 600; font-size: .92rem;
+  padding: 7px 12px; border-radius: 10px; cursor: pointer;
+  border: 2px solid var(--ink); background: transparent; color: var(--ink);
+}
+.btn:hover { background: var(--ink); color: var(--paper); }
+.btn.primary { background: var(--cobalt); border-color: var(--cobalt); color: var(--cobalt-ink); }
+.btn.primary:hover { filter: brightness(1.1); }
+.btn.small { padding: 4px 10px; font-size: .85rem; }
+
+.roster { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.roster li {
+  display: grid; grid-template-columns: minmax(120px, 200px) 1fr; gap: 6px 16px;
+  padding: 12px 0; border-bottom: 1px solid var(--line);
+}
+.roster .hh { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; overflow-wrap: anywhere; }
+.roster .dishes { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.dots { display: inline-flex; gap: 5px; vertical-align: middle; margin-left: 6px; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--ink-soft); }
+.dots i.on { background: var(--persimmon); border-color: var(--persimmon); }
+.dots i.maybe { border-style: dashed; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(18px + env(safe-area-inset-bottom, 0px));
+  transform: translate(-50%, 20px); opacity: 0;
+  background: var(--ink); color: var(--paper);
+  padding: 10px 16px; border-radius: 10px; font-weight: 500;
+  transition: opacity .2s, transform .2s; pointer-events: none; z-index: 20;
+  max-width: calc(100% - 32px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 560px) {
+  :root { --pscale: .7; }
+  .masthead { padding-block: 28px 0; }
+  .roster li { grid-template-columns: 1fr; }
+  .art svg { height: 52px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .walker, .walker svg, .leg, .eye, .youbar input.needs { animation: none !important; }
+  .card { transition: none; }
+}
+</style>
+
+<header class="masthead">
+  <div class="gutter"><div class="wrap">
+    <h1>DemDam <span class="t2">Thanksgiving Signup</span></h1>
+    <dl class="details">
+      <div><dt>Date</dt><dd>Sunday, November 22, 2026</dd></div>
+      <div><dt>Arrive</dt><dd>3 PM</dd></div>
+      <div><dt>Dinner</dt><dd>5 PM</dd></div>
+      <div><dt>Where</dt><dd>1411 N Vernon St</dd></div>
+    </dl>
+  </div></div>
+  <div class="parade" id="parade" aria-hidden="true"></div>
+  <div class="soil"></div>
+</header>
+
+<div class="youbar gutter">
+  <div class="wrap">
+    <label for="household">Your household</label>
+    <input id="household" list="households" autocomplete="off" maxlength="40">
+    <datalist id="households"></datalist>
+    <span class="mine-count" id="mineCount"></span>
+  </div>
+</div>
+
+<main class="gutter">
+  <div class="wrap">
+    <div class="countdown" role="timer" aria-label="Time until the party">
+      <div class="cd-units">
+        <div><span class="n" id="cd-d">0</span><span class="u">Days</span></div>
+        <div><span class="n" id="cd-h">00</span><span class="u">Hours</span></div>
+        <div><span class="n" id="cd-m">00</span><span class="u">Min</span></div>
+        <div><span class="n" id="cd-s">00</span><span class="u">Sec</span></div>
+      </div>
+      <p class="cd-for">until 3 PM, Sunday, November 22</p>
+    </div>
+
+    <section id="sec-host">
+      <div class="sec-head"><span class="art" id="art-host"></span><h2>Already covered</h2></div>
+      <div class="grid host-grid" id="grid-host"></div>
+    </section>
+
+    <section id="sec-sides">
+      <div class="sec-head"><span class="art" id="art-sides"></span><h2>Sides</h2><span class="meta" id="meta-sides"></span></div>
+      <div class="grid" id="grid-sides"></div>
+    </section>
+
+    <section id="sec-more">
+      <div class="sec-head"><span class="art" id="art-more"></span><h2>Dessert and more</h2><span class="meta" id="meta-more"></span></div>
+      <div class="grid" id="grid-more"></div>
+    </section>
+
+    <section id="sec-roster">
+      <div class="sec-head"><span class="art" id="art-roster"></span><h2>Who's bringing what</h2><span class="meta" id="meta-roster"></span></div>
+      <ul class="roster" id="roster"></ul>
+    </section>
+
+    <div class="mock" id="mockNote">
+      <strong>Mockup</strong>
+      <span>Sample signups. Changes stay in this page only.</span>
+      <div class="slider">
+        <label for="turkeyTime">Turkey time</label>
+        <input type="range" id="turkeyTime" min="0" max="100" value="0">
+        <output id="turkeyTimeOut" for="turkeyTime">0:00</output>
+      </div>
+      <button class="btn small" id="clearSample" type="button">Clear sample signups</button>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===================== CONFIG ===================== */
+// When hosting on GitHub Pages, paste the Google Apps Script web app URL (ends in /exec) here.
+// Left empty, the page runs as a mockup with sample data held in memory.
+const SHEET_API = 'https://script.google.com/macros/s/AKfycbwW-rz1ugummfpc_zQPbuY9Q-uhEOu_3atDT3rJR9cDet0JAIgn3fZPMW1pfxqetdA5Ng/exec';
+const HOST_NAME = 'DemDam';
+const EXPECTED = { min: 6, max: 8 };
+const HOST_ITEMS = ['Turkey', 'Gravy', 'Oyster dressing', 'Cranberry sauce', 'Pie'];
+const CATS = [
+  { id: 'potato', name: 'Potato side', group: 'sides' },
+  { id: 'veg', name: 'Vegetable side', group: 'sides' },
+  { id: 'salad', name: 'Green salad', group: 'sides' },
+  { id: 'starch', name: 'Starchy side', group: 'sides' },
+  { id: 'dealer', name: "Dealer's choice", group: 'sides' },
+  { id: 'dessert', name: 'Dessert', group: 'more' },
+  { id: 'drinks', name: 'Drinks', group: 'more' },
+  { id: 'other', name: 'Something else', group: 'more' }
+];
+// Countdown target, in the viewer's local time: Nov 22 2026, 3 PM (month is 0-based).
+const PARTY = new Date(2026, 10, 22, 15, 0, 0);
+function tickCountdown() {
+  const s = Math.max(0, Math.floor((PARTY - Date.now()) / 1000));
+  const p2 = n => String(n).padStart(2, '0');
+  document.getElementById('cd-d').textContent = Math.floor(s / 86400);
+  document.getElementById('cd-h').textContent = p2(Math.floor(s % 86400 / 3600));
+  document.getElementById('cd-m').textContent = p2(Math.floor(s % 3600 / 60));
+  document.getElementById('cd-s').textContent = p2(s % 60);
+}
+tickCountdown();
+setInterval(tickCountdown, 1000);
+const catName = id =>(CATS.find(c => c.id === id) || { name: id }).name;
+
+// Turkeys look normal for GRACE seconds, then reach full horror after GRACE + RAMP seconds.
+const GRACE = 15, RAMP = 225;
+
+const SAMPLE = [
+  ['The Riveras', 'potato', 'Mashed potatoes'],
+  ['The Riveras', 'starch', 'Rolls'],
+  ['Pat & Lee', 'veg', 'Green beans'],
+  ['Pat & Lee', 'dessert', 'Pumpkin pie'],
+  ['Pat & Lee', 'dessert', ''],
+  ['The Okafors', 'potato', ''],
+  ['The Okafors', 'salad', 'Kale salad'],
+  ['Jun', 'other', 'Sparkling cider']
+];
+
+/* ===================== TURKEYS ===================== */
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FEATHERS = ['var(--persimmon)', 'var(--mustard)', 'var(--cobalt)', 'var(--mustard)'];
+const EYE_POS = {
+  1: [[3, -3]],
+  3: [[-5, -5], [5, -6], [0, 3]],
+  5: [[-7, -4], [0, -9], [7, -4], [-4, 5], [5, 5]]
+};
+function rng(seed) {
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+const clamp01 = x => Math.min(1, Math.max(0, x));
+const ss = (a, b, x) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const f1 = n => Math.round(n * 10) / 10;
+
+// How weird a turkey is at madness m (0..1). Each trait goes strange early; everything else follows.
+function params(trait, seed, m) {
+  const s = (a, b) => ss(a, b, m);
+  const p = { seed, m, horror: m > .5 };
+  p.legs = 34 * (1 + (trait === 'stilts' ? 2.6 : .5) * s(.05, .4));
+  p.neck = 20 * (1 + (trait === 'neck' ? 3.4 : .7) * s(.08, .45));
+  p.headEyes = trait === 'eyes' ? (m > .3 ? 5 : m > .1 ? 3 : 1) : (m > .55 ? 5 : m > .35 ? 3 : 1);
+  p.cutlery = trait === 'cutlery' && m > .1;
+  p.feathers = 7 + 2 * Math.round(3 * s(.15, .6));
+  p.tailLen = 50 * (1 + (trait === 'tail' ? .9 : .3) * s(.1, .5));
+  p.featherEyes = m > .4;
+  p.tailTent = !p.cutlery && m > .62;
+  p.hatDepth = trait === 'totem' ? (m > .3 ? 2 : m > .1 ? 1 : 0)
+    : ((trait === 'hat' && m > .1) || (seed % 3 === 0 && m > .5)) ? 1 : 0;
+  p.tentLegs = m > .55 ? 3 + Math.round(5 * s(.55, .9)) : 0;
+  p.bodyEyes = Math.round(14 * s(.48, .95));
+  p.heads = Math.round(3 * s(.62, .95));
+  p.maw = s(.72, .92);
+  p.openBeak = m > .68;
+  p.stalks = Math.round(6 * s(.8, 1));
+  p.swell = 1 + .35 * s(.6, 1);
+  p.wattle = 1 + 1.6 * s(.5, 1);
+  return p;
+}
+
+function drawTurkey(p) {
+  const B = { x0: -36, x1: 46, y0: -40 };
+  const pt = (x, y, r = 0) => { B.x0 = Math.min(B.x0, x - r); B.x1 = Math.max(B.x1, x + r); B.y0 = Math.min(B.y0, y - r); };
+  const R = k => rng(p.seed * 131 + k);
+  const anim = (deg, x, y, r) => RM ? '' :
+    `<animateTransform attributeName="transform" type="rotate" values="${-deg} ${f1(x)} ${f1(y)};${deg} ${f1(x)} ${f1(y)};${-deg} ${f1(x)} ${f1(y)}" dur="${f1(2.2 + r() * 2.5)}s" begin="-${f1(r() * 4)}s" repeatCount="indefinite"/>`;
+  const eye = (x, y, r) => {
+    pt(x, y, r);
+    const inner = p.horror
+      ? `<circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r * .66)}" fill="var(--mustard)"/><ellipse cx="${f1(x)}" cy="${f1(y)}" rx="${f1(r * .2)}" ry="${f1(r * .58)}" fill="var(--pupil)"/>`
+      : `<circle cx="${f1(x + r * .25)}" cy="${f1(y)}" r="${f1(r * .47)}" fill="var(--pupil)"/>`;
+    return `<g class="eye"><circle cx="${f1(x)}" cy="${f1(y)}" r="${f1(r)}" fill="var(--eye)"/>${inner}</g>`;
+  };
+  const tentacle = (bx, by, theta, len, w0, color, r, deg, tipEye) => {
+    const n = 14, waves = 1 + r() * 1.5, amp = 4 + r() * 6, ph = r() * 6.28, curl = (r() < .5 ? -1 : 1) * (6 + r() * 10);
+    const dx = Math.sin(theta), dy = -Math.cos(theta), px = Math.cos(theta), py = Math.sin(theta);
+    const L = [], Rt = [], C = [];
+    for (let i = 0; i <= n; i++) {
+      const t = i / n, along = t * len, side = Math.sin(t * Math.PI * waves + ph) * amp * t + curl * t * t * t;
+      const cx = bx + along * dx + side * px, cy = by + along * dy + side * py, w = (w0 * (1 - t) + .9) / 2;
+      L.push(`${f1(cx + px * w)} ${f1(cy + py * w)}`); Rt.push(`${f1(cx - px * w)} ${f1(cy - py * w)}`);
+      C.push([cx, cy, w]); pt(cx, cy, w);
+    }
+    let g = `<path d="M${L.join('L')}L${Rt.reverse().join('L')}Z" fill="${color}"/>`;
+    for (let i = 3; i < n - 1; i += 2) {
+      const [cx, cy, w] = C[i];
+      g += `<circle cx="${f1(cx + px * w * .45)}" cy="${f1(cy + py * w * .45)}" r="${f1(w * .32)}" fill="var(--eye)" opacity=".55"/>`;
+    }
+    if (tipEye) { const [cx, cy] = C[n]; g += eye(cx, cy, 4.2); }
+    return `<g>${anim(deg, bx, by, r)}${g}</g>`;
+  };
+  const head = (hx, hy, hr, nEyes) => {
+    pt(hx, hy, hr); pt(hx + hr + 11, hy);
+    let g = `<circle cx="${f1(hx)}" cy="${f1(hy)}" r="${f1(hr)}" fill="var(--brown-2)"/>`;
+    const bx = hx + hr - 2;
+    if (p.openBeak) {
+      g += `<path d="M${f1(bx)} ${f1(hy)}L${f1(bx + 11)} ${f1(hy - 6)}L${f1(bx + 11)} ${f1(hy + 9)}Z" fill="var(--pupil)"/>`;
+      g += `<path d="M${f1(bx)} ${f1(hy - 3)}L${f1(bx + 12)} ${f1(hy - 7)}L${f1(bx)} ${f1(hy + 1)}Z" fill="var(--mustard)"/>`;
+      g += `<path d="M${f1(bx)} ${f1(hy + 3)}L${f1(bx + 11)} ${f1(hy + 10)}L${f1(bx)} ${f1(hy + 6)}Z" fill="var(--mustard)"/>`;
+      for (let i = 0; i < 3; i++) g += `<path d="M${f1(bx + 3 + i * 3)} ${f1(hy - 1.5 - i)}l1.4 3l1.4 -3.4Z" fill="var(--eye)"/>`;
+    } else {
+      g += `<path d="M${f1(bx)} ${f1(hy - 2)}L${f1(bx + 12)} ${f1(hy + 1)}L${f1(bx)} ${f1(hy + 5)}Z" fill="var(--mustard)"/>`;
+    }
+    const wl = 17 * p.wattle;
+    g += `<path d="M${f1(bx + 1)} ${f1(hy + 5)}q7 ${f1(wl * .6)} 0 ${f1(wl)}q-6 ${f1(-wl * .4)} 0 ${f1(-wl)}Z" fill="var(--persimmon)"/>`;
+    pt(bx + 6, hy + 5 + wl);
+    for (const [ex, ey] of EYE_POS[nEyes]) g += eye(hx + ex, hy + ey, nEyes > 1 ? 3.4 : 3.6);
+    return g;
+  };
+
+  const sw = p.swell, rx = 30 * sw, ry = 26 * sw;
+  const cy = -p.legs - ry + 2, pv = cy - 6 * sw;
+  let s = '';
+
+  // tail
+  const rT = R(1);
+  for (let i = 0; i < p.feathers; i++) {
+    const a = -75 + 150 * i / (p.feathers - 1), ar = a * Math.PI / 180, len = p.tailLen;
+    const tipX = Math.sin(ar) * len, tipY = pv - Math.cos(ar) * len;
+    if (p.tailTent) {
+      s += tentacle(0, pv, ar, len * 1.3, 11, FEATHERS[i % 4], rT, 7, p.featherEyes);
+    } else if (p.cutlery) {
+      const k = len - 14;
+      const hd = i % 2
+        ? `<ellipse cx="0" cy="${f1(-len + 6)}" rx="6" ry="8.5" fill="var(--ink-soft)"/>`
+        : `<path d="M-6 ${f1(-k)}H6M-6 ${f1(-k)}V${f1(-len)}M0 ${f1(-k)}V${f1(-len)}M6 ${f1(-k)}V${f1(-len)}" stroke="var(--ink-soft)" stroke-width="2.4" stroke-linecap="round" fill="none"/>`;
+      s += `<g transform="translate(0 ${f1(pv)}) rotate(${f1(a)})"><path d="M0 0V${f1(-k)}" stroke="var(--ink-soft)" stroke-width="3.4" stroke-linecap="round" fill="none"/>${hd}</g>`;
+      pt(tipX, tipY, 8);
+    } else {
+      s += `<ellipse cx="0" cy="${f1(-len / 2)}" rx="9.5" ry="${f1(len / 2)}" fill="${FEATHERS[i % 4]}" transform="translate(0 ${f1(pv)}) rotate(${f1(a)})"/>`;
+      pt(tipX, tipY, 10);
+      if (p.featherEyes) s += eye(Math.sin(ar) * (len - 9), pv - Math.cos(ar) * (len - 9), 4);
+    }
+  }
+
+  // legs, or what replaces them
+  if (p.tentLegs) {
+    const rL = R(2), k = p.tentLegs;
+    for (let j = 0; j < k; j++) {
+      const u = k === 1 ? 0 : j / (k - 1) * 2 - 1, th = Math.PI + u * .55;
+      const bx = u * rx * .65, by = cy + ry * .55;
+      s += tentacle(bx, by, th, (-by) / Math.cos(u * .55) * 1.02, 8 * sw, 'var(--brown)', rL, 3, false);
+    }
+  } else {
+    const hip = cy + 18;
+    const leg = (x, dx, c) => `<path class="leg ${c}" d="M${x} ${f1(hip)}L${x + dx} 0l-7 2M${x + dx} 0l0 3.5M${x + dx} 0l7 2" stroke="var(--mustard)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`;
+    s += leg(-9, -2, 'leg-a') + leg(9, 2, 'leg-b');
+  }
+
+  // extra heads, behind the main one
+  const slots = [[-30, -1.0], [-52, -.7], [0, -1.35]];
+  for (let k = 0; k < p.heads; k++) {
+    const nb = [-8 - k * 6, cy - ry * .6];
+    const hx = slots[k][0] * sw, hy = cy - ry * .5 + slots[k][1] * (30 + p.neck);
+    s += `<path d="M${f1(nb[0])} ${f1(nb[1])}Q${f1(hx - 14)} ${f1((nb[1] + hy) / 2)} ${f1(hx)} ${f1(hy)}" stroke="var(--brown)" stroke-width="8" stroke-linecap="round" fill="none"/>`;
+    s += head(hx, hy, 15, 3);
+  }
+
+  // body
+  s += `<ellipse cx="0" cy="${f1(cy)}" rx="${f1(rx)}" ry="${f1(ry)}" fill="var(--brown)"/>`;
+  s += `<ellipse cx="${f1(-5 * sw)}" cy="${f1(cy + 3)}" rx="${f1(17 * sw)}" ry="${f1(12 * sw)}" fill="var(--pupil)" opacity=".18" transform="rotate(-14 ${f1(-5 * sw)} ${f1(cy + 3)})"/>`;
+  pt(-rx, cy, 0); pt(rx, cy, 0);
+
+  // eyes that grow on the body
+  if (p.bodyEyes) {
+    const rE = R(3), placed = [];
+    for (let i = 0; i < p.bodyEyes; i++) {
+      for (let tries = 0; tries < 40; tries++) {
+        const x = (rE() * 2 - 1) * rx * .8, y = cy + (rE() * 2 - 1) * ry * .75, rr = (2.6 + rE() * 3.6) * sw;
+        if ((x / (rx * .82)) ** 2 + ((y - cy) / (ry * .78)) ** 2 > 1) continue;
+        if (((x - 8 * sw) / (19 * sw)) ** 2 + ((y - cy - 9 * sw) / (13 * sw)) ** 2 < 1.2) continue;
+        if (placed.some(([px, py, pr]) => Math.hypot(px - x, py - y) < pr + rr + 1)) continue;
+        placed.push([x, y, rr]); break;
+      }
+    }
+    placed.forEach(([x, y, rr]) => { s += eye(x, y, rr); });
+  }
+
+  // a mouth where no mouth should be
+  if (p.maw > 0) {
+    const mx = 8 * sw, my = cy + 9 * sw, mrx = 16 * sw * p.maw, mry = 9 * sw * p.maw;
+    s += `<ellipse cx="${f1(mx)}" cy="${f1(my)}" rx="${f1(mrx)}" ry="${f1(mry)}" fill="var(--pupil)"/>`;
+    for (let i = 0; i < 7; i++) {
+      const tx = mx - mrx * .8 + (mrx * 1.6) * i / 6, e = Math.sqrt(Math.max(0, 1 - ((tx - mx) / mrx) ** 2)), tw = mrx * .11;
+      s += `<path d="M${f1(tx - tw)} ${f1(my - mry * e)}L${f1(tx)} ${f1(my - mry * e + mry * .55)}L${f1(tx + tw)} ${f1(my - mry * e)}Z" fill="var(--eye)"/>`;
+      if (i < 6) {
+        const bx = tx + mrx * .8 / 6, eb = Math.sqrt(Math.max(0, 1 - ((bx - mx) / mrx) ** 2));
+        s += `<path d="M${f1(bx - tw)} ${f1(my + mry * eb)}L${f1(bx)} ${f1(my + mry * eb - mry * .5)}L${f1(bx + tw)} ${f1(my + mry * eb)}Z" fill="var(--eye)"/>`;
+      }
+    }
+  }
+
+  // eye stalks
+  const rS = R(4);
+  for (let i = 0; i < p.stalks; i++) {
+    const ang = -1.1 + 2.2 * (i + .5) / 6;
+    const bx = Math.sin(ang) * rx * .6, by = cy - Math.cos(ang) * ry * .8;
+    const ex = Math.sin(ang) * (rx + 16 + (i % 2) * 10), ey = cy - Math.cos(ang) * (ry + 26 + (i % 2) * 14);
+    s += `<g>${anim(8, bx, by, rS)}<path d="M${f1(bx)} ${f1(by)}Q${f1((bx + ex) / 2 + 8)} ${f1((by + ey) / 2)} ${f1(ex)} ${f1(ey)}" stroke="var(--brown-2)" stroke-width="2.6" stroke-linecap="round" fill="none"/>${eye(ex, ey, 4.6)}</g>`;
+  }
+
+  // main neck and head
+  const hr = 11 + (p.headEyes - 1) * 2, hx = 22 * sw, hy = cy - 18 * sw - p.neck;
+  s += `<path d="M${f1(12 * sw)} ${f1(cy - 12 * sw)}Q${f1(30 * sw + p.neck * .15)} ${f1(cy - 16 * sw - p.neck / 2)} ${f1(hx)} ${f1(hy)}" stroke="var(--brown)" stroke-width="10" stroke-linecap="round" fill="none"/>`;
+  s += head(hx, hy, hr, p.headEyes);
+
+  // something standing on its head
+  if (p.hatDepth > 0) {
+    const sub = params('none', p.seed + 11, p.m * .85);
+    sub.hatDepth = p.hatDepth - 1;
+    const d = drawTurkey(sub), sc = p.hatDepth > 1 || sub.hatDepth ? .5 : .4, ty = hy - hr + 2;
+    s += `<g transform="translate(${f1(hx)} ${f1(ty)}) scale(${sc})">${d.g}</g>`;
+    pt(hx + d.B.x0 * sc, ty); pt(hx + d.B.x1 * sc, ty); pt(hx, ty + d.B.y0 * sc);
+  }
+  return { g: s, B };
+}
+function turkeySVG(p, scale) {
+  const { g, B } = drawTurkey(p);
+  const x0 = B.x0 - 4, y0 = B.y0 - 4, w = B.x1 + 4 - x0, h = 7 - y0;
+  const style = scale ? ` style="width:calc(${f1(w * scale)}px * var(--pscale))"` : '';
+  return `<svg viewBox="${f1(x0)} ${f1(y0)} ${f1(w)} ${f1(h)}"${style} aria-hidden="true">${g}</svg>`;
+}
+
+// Parade walkers and section-heading turkeys. d = head start before they turn (higher = later).
+const PARADE = [
+  { trait: 'stilts', seed: 4, s: .8, x: 4, dur: 70, d: .02 },
+  { trait: 'cutlery', seed: 7, s: .92, x: 22, dur: 58, d: .14 },
+  { trait: 'neck', seed: 9, s: .85, x: 38, dur: 64, d: .06 },
+  { trait: 'eyes', seed: 12, s: .92, x: 55, dur: 52, d: .22 },
+  { trait: 'hat', seed: 15, s: .92, x: 72, dur: 60, d: .1 },
+  { trait: 'tail', seed: 21, s: .8, x: 88, dur: 74, d: .18 }
+];
+const sprites = [];
+const parade = document.getElementById('parade');
+PARADE.forEach(t => {
+  const el = document.createElement('div');
+  el.className = 'walker';
+  el.style.cssText = `left:${t.x}%;--dur:${t.dur}s;--delay:${-(t.x + 10) / 110 * t.dur}s`;
+  parade.appendChild(el);
+  sprites.push({ el, trait: t.trait, seed: t.seed, d: t.d, scale: t.s, q: -1 });
+});
+[['art-host', 'hat', 30, .12], ['art-sides', 'neck', 33, .2], ['art-more', 'cutlery', 36, .26], ['art-roster', 'totem', 39, .3]]
+  .forEach(([id, trait, seed, d]) => sprites.push({ el: document.getElementById(id), trait, seed, d, scale: 0, q: -1 }));
+
+let t0 = performance.now();
+const slider = document.getElementById('turkeyTime');
+const sliderOut = document.getElementById('turkeyTimeOut');
+let dragging = false;
+const elapsed = () => (performance.now() - t0) / 1000;
+const madness = () => clamp01((elapsed() - GRACE) / RAMP);
+function tickTurkeys() {
+  const m = madness();
+  for (const sp of sprites) {
+    const q = Math.round(clamp01(m * 1.3 - sp.d) * 60) / 60;
+    if (q === sp.q) continue;
+    sp.q = q;
+    sp.el.innerHTML = turkeySVG(params(sp.trait, sp.seed, q), sp.scale);
+  }
+  const e = Math.floor(elapsed());
+  sliderOut.textContent = `${Math.floor(e / 60)}:${String(e % 60).padStart(2, '0')}`;
+  if (!dragging) slider.value = Math.round(m * 100);
+}
+slider.addEventListener('input', () => {
+  dragging = true;
+  t0 = performance.now() - (GRACE + RAMP * slider.value / 100) * 1000;
+  tickTurkeys();
+});
+slider.addEventListener('change', () => { dragging = false; });
+tickTurkeys();
+setInterval(tickTurkeys, 1000);
+
+/* ===================== DATA ===================== */
+let claims = [];
+let me = '';
+let editing = null;
+try { me = localStorage.getItem('dd-household') || ''; } catch (e) {}
+const norm = s => (s || '').trim().replace(/\s+/g, ' ');
+const same = (a, b) => norm(a).toLowerCase() === norm(b).toLowerCase();
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+async function loadClaims() {
+  if (!SHEET_API) {
+    claims = SAMPLE.map(([household, category, dish], i) => ({ id: 's' + i, household, category, dish, ts: i }));
+    return;
+  }
+  const r = await fetch(SHEET_API + '?action=list');
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || 'Load failed');
+  claims = j.claims || [];
+}
+// Returns the server's full list after the change, or null in mockup mode.
+async function send(action, claim) {
+  if (!SHEET_API) return null;
+  // text/plain keeps the request "simple" so Apps Script doesn't need a CORS preflight
+  const r = await fetch(SHEET_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action, ...claim })
+  });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error || 'Save failed');
+  return j.claims;
+}
+
+/* ===================== RENDER ===================== */
+function keepInputs(fn) {
+  const vals = {};
+  document.querySelectorAll('main input[id^="add-"], main input[id^="edit-"]').forEach(i => { vals[i.id] = i.value; });
+  const a = document.activeElement, fid = a && a.closest && a.closest('main') ? a.id : null;
+  let sel = null;
+  try { if (a && a.selectionStart != null) sel = [a.selectionStart, a.selectionEnd]; } catch (e) {}
+  fn();
+  for (const id in vals) { const el = document.getElementById(id); if (el) el.value = vals[id]; }
+  if (fid) {
+    const el = document.getElementById(fid);
+    if (el) { el.focus(); if (sel) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} }
+  }
+}
+const dishText = c => c.dish ? esc(c.dish) : '<span class="tbd">TBD</span>';
+
+function catCard(cat) {
+  const list = claims.filter(c => c.category === cat.id);
+  const mine = me && list.some(c => same(c.household, me));
+  const state = mine ? 'mine' : list.length ? 'claimed' : 'open';
+  const rows = list.length ? list.map(c => {
+    const own = me && same(c.household, me);
+    if (own && editing === c.id) {
+      return `<li class="entry me"><span class="hh">${esc(c.household)}</span>
+        <form class="edit" data-id="${c.id}">
+          <div class="field"><label for="edit-${c.id}">Your dish</label><input id="edit-${c.id}" maxlength="60" value="${esc(c.dish)}"></div>
+          <button class="btn primary small" type="submit" value="save">Save</button>
+          <button class="btn small" type="submit" value="tbd">TBD</button>
+          <button class="linkbtn" type="button" data-act="cancel">Cancel</button>
+        </form></li>`;
+    }
+    return `<li class="entry${own ? ' me' : ''}"><span class="hh">${esc(c.household)}</span><span class="what">${dishText(c)}</span>${own
+      ? `<span class="acts"><button class="linkbtn" type="button" data-act="edit" data-id="${c.id}">Edit</button><button class="linkbtn" type="button" data-act="remove" data-id="${c.id}">Remove</button></span>` : ''}</li>`;
+  }).join('') : '<li class="none">No one yet</li>';
+  return `<article class="card" data-state="${state}">
+    <div class="card-top"><h3>${esc(cat.name)}</h3><span class="count" aria-label="${list.length} signed up">${list.length}</span></div>
+    <ul class="entries">${rows}</ul>
+    <form class="add" data-cat="${cat.id}">
+      <div class="field"><label for="add-${cat.id}">Your dish</label><input id="add-${cat.id}" maxlength="60"></div>
+      <button class="btn primary" type="submit" value="add">Add</button>
+      <button class="btn" type="submit" value="tbd">TBD</button>
+    </form>
+  </article>`;
+}
+function render() {
+  keepInputs(() => {
+    document.getElementById('grid-host').innerHTML = HOST_ITEMS.map(d =>
+      `<article class="card"><h3>${esc(d)}</h3><ul class="entries"><li><span class="chip host">${esc(HOST_NAME)}</span></li></ul></article>`
+    ).join('');
+
+    for (const g of ['sides', 'more']) {
+      const cats = CATS.filter(c => c.group === g);
+      document.getElementById('grid-' + g).innerHTML = cats.map(catCard).join('');
+      const covered = cats.filter(c => claims.some(x => x.category === c.id)).length;
+      document.getElementById('meta-' + g).textContent = `${covered}/${cats.length} have someone`;
+    }
+
+    const households = [];
+    claims.forEach(c => { if (!households.some(h => same(h, c.household))) households.push(norm(c.household)); });
+    const rows = [`<li><span class="hh">${esc(HOST_NAME)}</span><span class="dishes">${HOST_ITEMS.map(d => `<span class="chip host">${esc(d)}</span>`).join('')}</span></li>`];
+    households.forEach(h => {
+      const ds = claims.filter(c => same(c.household, h));
+      rows.push(`<li><span class="hh">${esc(h)}</span><span class="dishes">${ds.map(c =>
+        `<span class="chip${same(h, me) ? ' me' : ''}"><span class="k">${esc(catName(c.category))}</span>${c.dish ? esc(c.dish) : 'TBD'}</span>`).join('')}</span></li>`);
+    });
+    document.getElementById('roster').innerHTML = rows.join('');
+    const dots = Array.from({ length: EXPECTED.max }, (_, i) =>
+      `<i class="${i < households.length ? 'on' : i >= EXPECTED.min ? 'maybe' : ''}"></i>`).join('');
+    document.getElementById('meta-roster').innerHTML = `${households.length} of ${EXPECTED.min}–${EXPECTED.max} households <span class="dots">${dots}</span>`;
+
+    document.getElementById('households').innerHTML = households.map(h => `<option value="${esc(h)}">`).join('');
+    const n = me ? claims.filter(c => same(c.household, me)).length : 0;
+    document.getElementById('mineCount').textContent = me ? `${n} signed up` : '';
+    document.getElementById('mockNote').hidden = !!SHEET_API;
+  });
+}
+
+/* ===================== ACTIONS ===================== */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+const nameInput = document.getElementById('household');
+nameInput.value = me;
+nameInput.addEventListener('input', () => {
+  me = norm(nameInput.value);
+  editing = null;
+  nameInput.classList.remove('needs');
+  try { localStorage.setItem('dd-household', me); } catch (e) {}
+  render();
+});
+function needName() {
+  if (me) return false;
+  nameInput.classList.remove('needs'); void nameInput.offsetWidth; nameInput.classList.add('needs');
+  nameInput.focus();
+  toast('Add your household name first');
+  return true;
+}
+async function save(action, claim, msg) {
+  render(); toast(msg);
+  try {
+    const fresh = await send(action, claim);
+    if (fresh) { claims = fresh; if (!editing) render(); }
+  } catch (e) {
+    toast(`Could not save (${e.message}). Reloading the list.`);
+    try { await loadClaims(); } catch (e2) {}
+    render();
+  }
+}
+const main = document.querySelector('main');
+main.addEventListener('submit', e => {
+  e.preventDefault();
+  const form = e.target, how = e.submitter ? e.submitter.value : 'add';
+  if (form.classList.contains('add')) {
+    if (needName()) return;
+    const input = form.querySelector('input');
+    const dish = how === 'tbd' ? '' : norm(input.value);
+    if (how !== 'tbd' && !dish) { input.focus(); toast('Type your dish, or choose TBD'); return; }
+    input.value = '';
+    const c = { id: uid(), household: me, category: form.dataset.cat, dish, ts: Date.now() };
+    claims.push(c);
+    save('add', c, `Added to ${catName(c.category)}`);
+  } else if (form.classList.contains('edit')) {
+    const c = claims.find(x => x.id === form.dataset.id);
+    if (!c) return;
+    c.dish = how === 'tbd' ? '' : norm(form.querySelector('input').value);
+    editing = null;
+    save('update', c, 'Saved');
+  }
+});
+main.addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]');
+  if (!b) return;
+  if (b.dataset.act === 'edit') {
+    editing = b.dataset.id; render();
+    const el = document.getElementById('edit-' + editing);
+    if (el) { el.focus(); el.select(); }
+  } else if (b.dataset.act === 'cancel') {
+    editing = null; render();
+  } else if (b.dataset.act === 'remove') {
+    const c = claims.find(x => x.id === b.dataset.id);
+    if (!c) return;
+    claims = claims.filter(x => x !== c);
+    save('remove', c, `Removed from ${catName(c.category)}`);
+  }
+});
+document.getElementById('clearSample').addEventListener('click', () => {
+  claims = claims.filter(c => !String(c.id).startsWith('s'));
+  render(); toast('Sample signups cleared');
+});
+
+loadClaims().then(render).catch(() => { render(); toast('Could not load signups'); });
+if (SHEET_API) setInterval(() => { if (!editing) loadClaims().then(render).catch(() => {}); }, 30000);
+</script>
