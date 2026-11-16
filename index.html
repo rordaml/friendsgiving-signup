@@ -213,7 +213,15 @@ section { display: flex; flex-direction: column; gap: 16px; }
 .host-grid .card { border-style: solid; border-color: var(--ink); gap: 8px; padding: 12px 14px; }
 .card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .card h3 { margin: 0; font-family: var(--font-display); font-weight: 700; font-variation-settings: "wdth" 85; font-size: 1.3rem; line-height: 1.15; min-width: 0; }
-.host-grid .card h3 { font-family: var(--font-body); font-weight: 600; font-size: 1.02rem; }
+.host-grid .card h3 { font-family: var(--font-body); font-weight: 600; font-size: 1.02rem; overflow-wrap: anywhere; }
+.host-grid .card h3.is-tbd { color: var(--ink-soft); font-family: var(--font-mono); font-weight: 500; letter-spacing: .06em; }
+.host-grid .card .kind {
+  margin: 2px 0 0; color: var(--ink-soft);
+  font-family: var(--font-mono); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase;
+}
+.host-grid .card .chip { align-self: flex-start; margin-top: auto; }
+.host-grid .card.me { border-color: var(--cobalt); }
+.chip.host .k { color: #2A1B12; opacity: .7; }
 .count {
   flex: none; min-width: 28px; height: 28px; padding: 0 6px;
   display: grid; place-items: center;
@@ -384,7 +392,7 @@ section { display: flex; flex-direction: column; gap: 16px; }
     </div>
 
     <section id="sec-host">
-      <div class="sec-head"><span class="art" id="art-host"></span><h2>Already covered</h2></div>
+      <div class="sec-head"><span class="art" id="art-host"></span><h2>Already covered</h2><span class="meta" id="meta-host"></span></div>
       <div class="grid host-grid" id="grid-host"></div>
     </section>
 
@@ -431,7 +439,13 @@ section { display: flex; flex-direction: column; gap: 16px; }
 const SHEET_API = 'https://script.google.com/macros/s/AKfycbwW-rz1ugummfpc_zQPbuY9Q-uhEOu_3atDT3rJR9cDet0JAIgn3fZPMW1pfxqetdA5Ng/exec';
 const HOST_NAME = 'Landon & Lauren';
 const EXPECTED = { min: 6, max: 8 };
-const HOST_ITEMS = ['Turkey', 'Gravy', 'Oyster dressing', 'Cranberry sauce', 'Pie'];
+const HOST_ITEMS = [
+  { dish: 'Turkey', kind: 'Main' },
+  { dish: 'Oyster dressing', kind: 'Starchy side' },
+  { dish: 'Gravy', kind: 'Accoutrement' },
+  { dish: 'Cranberry sauce', kind: 'Accoutrement' },
+  { dish: 'Pie', kind: 'Dessert' }
+];
 const CATS = [
   { id: 'potato', name: 'Potato side', group: 'sides' },
   { id: 'veg', name: 'Vegetable side', group: 'sides' },
@@ -548,9 +562,16 @@ function catCard(cat) {
 }
 function render() {
   keepInputs(() => {
-    document.getElementById('grid-host').innerHTML = HOST_ITEMS.map(d =>
-      `<article class="card"><h3>${esc(d)}</h3><ul class="entries"><li><span class="chip host">${esc(HOST_NAME)}</span></li></ul></article>`
+    // Everything that's spoken for: the hosts' dishes first, then every signup in the order it came in.
+    const covered = [
+      ...HOST_ITEMS.map(h => ({ title: h.dish, kind: h.kind, who: HOST_NAME, host: true })),
+      ...claims.map(c => ({ title: c.dish || 'TBD', tbd: !c.dish, kind: catName(c.category), who: c.household, me: me && same(c.household, me) }))
+    ];
+    document.getElementById('grid-host').innerHTML = covered.map(c =>
+      `<article class="card${c.me ? ' me' : ''}"><div><h3${c.tbd ? ' class="is-tbd"' : ''}>${esc(c.title)}</h3><p class="kind">${esc(c.kind)}</p></div>` +
+      `<span class="chip ${c.host ? 'host' : c.me ? 'me' : ''}">${esc(c.who)}</span></article>`
     ).join('');
+    document.getElementById('meta-host').textContent = `${covered.length} dishes`;
 
     for (const g of ['sides', 'more']) {
       const cats = CATS.filter(c => c.group === g);
@@ -561,7 +582,7 @@ function render() {
 
     const households = [];
     claims.forEach(c => { if (!households.some(h => same(h, c.household))) households.push(norm(c.household)); });
-    const rows = [`<li><span class="hh">${esc(HOST_NAME)}</span><span class="dishes">${HOST_ITEMS.map(d => `<span class="chip host">${esc(d)}</span>`).join('')}</span></li>`];
+    const rows = [`<li><span class="hh">${esc(HOST_NAME)}</span><span class="dishes">${HOST_ITEMS.map(h => `<span class="chip host"><span class="k">${esc(h.kind)}</span>${esc(h.dish)}</span>`).join('')}</span></li>`];
     households.forEach(h => {
       const ds = claims.filter(c => same(c.household, h));
       rows.push(`<li><span class="hh">${esc(h)}</span><span class="dishes">${ds.map(c =>
