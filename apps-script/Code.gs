@@ -1,5 +1,5 @@
 /**
- * DemDam Friendsgiving Signup: Google Apps Script backend.
+ * Friendsgiving Signup: Google Apps Script backend.
  *
  * Paste this whole file into Extensions > Apps Script of a Google Sheet,
  * then deploy it as a web app (see README.md).

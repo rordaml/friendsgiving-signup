@@ -1,4 +1,4 @@
-# DemDam Friendsgiving Signup
+# Friendsgiving Signup
 
 A one-page signup site for Friendsgiving. The page is plain HTML hosted on GitHub Pages; signups are stored in a Google Sheet through a small Apps Script web app.
 
@@ -41,7 +41,7 @@ Open `index.html` in a browser to test: add a dish, then check that a row appear
    ```bash
    git init
    git add index.html README.md apps-script
-   git commit -m "DemDam Friendsgiving signup"
+   git commit -m "Friendsgiving signup"
    git branch -M main
    git remote add origin https://github.com/YOUR-USERNAME/friendsgiving-signup.git
    git push -u origin main

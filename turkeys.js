@@ -1,4 +1,4 @@
-/* DemDam Friendsgiving Signup: the turkeys.
+/* Friendsgiving Signup: the turkeys.
  *
  * - They start normal and get stranger the longer the page is open.
  * - Clicking one roasts it. The roast is as strange as the turkey was, and keeps getting stranger.
